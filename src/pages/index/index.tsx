@@ -1,12 +1,16 @@
-import { View, Button } from "@tarojs/components";
+import { View, Button, Text } from "@tarojs/components";
 import Taro from "@tarojs/taro";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import "./index.less";
 
 export default function Index() {
-  //399个网格
+  //20x20个网格
   const row = 20;
   const col = 20;
+  // 定时器
+  let timer;
+  let randomRow: number;
+  let randomCol: number;
   // 网格 20*20
   const [grid, setGrid] = useState<number[][]>(
     Array(row)
@@ -15,26 +19,37 @@ export default function Index() {
   );
   //蛇的状态
   const [snake, setSnake] = useState<any>({
-    position: [{ x: 0, y: 0 }], //起始位置
+    position: [
+      { x: 3, y: 1 },
+      { x: 2, y: 1 },
+      { x: 1, y: 1 },
+    ], //起始位置
     direction: "r", //初始方向
-    longth: 1, //初始长度
     source: 0, //初始分数
-    life: 1, //1活着 0死了
   });
-  // 使用 useRef 保存定时器引用
-  let timer;
 
   //获得零食
   const getEat = () => {
     const newGrid = Array(row)
       .fill(null)
       .map(() => Array(col).fill(0));
-    // 获得一个随机数作为零食的位置
-    const randomRow = Math.floor(Math.random() * row);
-    const randomCol = Math.floor(Math.random() * col);
-    newGrid[randomRow][randomCol] = 1;
-    console.log("newGrid", newGrid);
-    setGrid([...newGrid]);
+    let flag = false;
+
+    //判断是否出现在蛇的位置
+    do {
+      randomRow = Math.floor(Math.random() * row);
+      randomCol = Math.floor(Math.random() * col);
+      for (let i = 0; i < snake.position.length; i++) {
+        if (snake.position[i].x === randomRow && snake.position[i].y === randomCol) {
+          flag = true;
+          break;
+        }
+      }
+    } while (flag);
+    if (!flag) {
+      newGrid[randomRow][randomCol] = 1;
+      setGrid([...newGrid]);
+    }
   };
 
   //移动蛇
@@ -42,112 +57,168 @@ export default function Index() {
     // 根据最新的方向移动蛇
     setSnake((prevSnake) => {
       // 状态更新后执行
-      const newPosition = [...prevSnake.position];
-      console.log("newPosition", prevSnake.direction);
-
+      const newPosition: any = [];
+      const head = { ...prevSnake.position[0] };
       // 根据最新的方向移动蛇头
       switch (prevSnake.direction) {
         case "r":
-          newPosition[0].x += 1;
+          head.x += 1;
           break;
         case "l":
-          newPosition[0].x -= 1;
+          head.x -= 1;
           break;
         case "u":
-          newPosition[0].y -= 1;
+          head.y -= 1;
           break;
         case "d":
-          newPosition[0].y += 1;
+          head.y += 1;
           break;
       }
-
-      // 碰撞检测使用最新状态
-      if (
-        newPosition[0].x < 0 ||
-        newPosition[0].x * 30 >= 570 ||
-        newPosition[0].y < 0 ||
-        newPosition[0].y * 30 >= 570
-      ) {
+      newPosition.push(head);
+      //移动蛇身  如果没有吃到食物 最后一个就舍掉了
+      for (let i = 0; i < prevSnake.position.length - 1; i++) {
+        newPosition.push(prevSnake.position[i]);
+      }
+      // 碰撞边边
+      if (head.x < 0 || head.x >= col || head.y < 0 || head.y >= row) {
         clearInterval(timer);
         Taro.showModal({
           content: `游戏结束\n本次得分：${prevSnake.source}`,
-          success: function (res) {
-            if (res.confirm) {
-              console.log("用户点击确定");
-            } else if (res.cancel) {
-              console.log("用户点击取消");
-            }
-          },
         });
-        return { ...prevSnake, life: 0 };
+      }
+      // 检查是否得分 y行 x列 不能用完全等于
+      if (head.x == randomCol && head.y == randomRow) {
+        newPosition.push(prevSnake.position[prevSnake.position.length - 1]);
+        prevSnake.source = prevSnake.source + 1;
+        //长度+1
+        prevSnake.longth = prevSnake.longth + 1;
+        // 重新生成食物
+        getEat();
+      }
+      // 检测蛇头是否与蛇身重叠
+      for (let i = 1; i < newPosition.length; i++) {
+        if (newPosition[0].x === newPosition[i].x && newPosition[0].y === newPosition[i].y) {
+          clearInterval(timer);
+          Taro.showModal({
+            content: `游戏结束\n本次得分：${prevSnake.source}`,
+          });
+        }
       }
 
       return { ...prevSnake, position: newPosition };
     });
   };
 
+  //改变方向
   const change = (direction: string) => {
-    setSnake((snake) => ({ ...snake, direction: direction }));
-    console.log(snake);
+    setSnake((prevSnake) => {
+      if (
+        (prevSnake.direction == "r" && direction == "l") ||
+        (prevSnake.direction == "l" && direction == "r") ||
+        (prevSnake.direction == "u" && direction == "d") ||
+        (prevSnake.direction == "d" && direction == "u")
+      ) {
+        return { ...prevSnake };
+      } else {
+        return { ...prevSnake, direction: direction };
+      }
+    });
   };
 
-  const start = () => {
-    getEat();
-    startGame();
-  };
-
-  // 游戏开始
+  // 游戏开始 蛇移动
   const startGame = () => {
     timer = setInterval(() => {
       moveSnake();
+    }, 300);
+  };
+
+  //开始/重新开始
+  const start = () => {
+    // 初始化蛇
+    setSnake({
+      position: [
+        { x: 3, y: 1 },
+        { x: 2, y: 1 },
+        { x: 1, y: 1 },
+      ], //起始位置
+
+      direction: "r", //初始方向
+      source: 0, //初始分数
+    });
+    // 初始化食物
+    setGrid(
+      Array(row)
+        .fill(null)
+        .map(() => Array(col).fill(0))
+    );
+    if (timer) {
+      clearInterval(timer);
+    }
+    //倒计时
+    let count = 3;
+    const countDown = setInterval(() => {
+      if (count == 0) {
+        clearInterval(countDown);
+        getEat();
+        startGame();
+      } else {
+        Taro.showToast({
+          title: `${count}`,
+          icon: "none",
+        });
+        count--;
+      }
     }, 1000);
   };
 
   return (
     <>
       <View className="index">
+        <View className="action">
+          分数：{snake.source}
+          <Text onClick={start} className="start">
+            开始
+          </Text>
+        </View>
         <View className="play-box">
-          <View
-            style={{
-              width:
-                snake.direction === "r" || snake.direction === "l"
-                  ? snake.longth * 30 + "rpx"
-                  : "30rpx",
-              background: "red",
-              position: "absolute",
-              left: snake.position[0].x * 30 + "rpx",
-              top: snake.position[0].y * 30 + "rpx",
-              height:
-                snake.direction === "d" || snake.direction === "u"
-                  ? snake.longth * 30 + "rpx"
-                  : "30rpx",
-              zIndex: 99,
-            }}
-          ></View>
-          {/* 渲染20*20个网关作为蛇吃饲料的显示以及蛇上下左右移动 */}
-          {grid.map((item, rowIndex) => {
-            return item.map((item, colIndex) => {
-              const current = rowIndex * row + colIndex;
-              return (
-                <View
-                  key={current}
-                  className="grid"
-                  style={{ display: current != 399 ? "block" : "none" }}
-                >
-                  <View className="eat" style={{ display: item === 1 ? "block" : "none" }}></View>
-                </View>
-              );
-            });
+          {snake.position.map((item, index) => {
+            return (
+              <View
+                key={index}
+                style={{
+                  width: "30rpx",
+                  height: "30rpx",
+                  backgroundColor: index == 0 ? "red" : "green",
+                  position: "absolute",
+                  left: item.x * 30 + "rpx",
+                  top: item.y * 30 + "rpx",
+                  borderRadius: "50%",
+                }}
+              ></View>
+            );
           })}
+          {/* 渲染20*20个网关作为蛇吃饲料的显示以及蛇上下左右移动 */}
+          {grid.map((rowItems, rowIndex) => (
+            <View key={rowIndex} className="flex" style={{ display: "flex" }}>
+              {rowItems.map((item, colIndex) => {
+                const current = rowIndex * col + colIndex;
+                return (
+                  <View key={current} className="grid">
+                    <View className="eat" style={{ display: item === 1 ? "block" : "none" }}></View>
+                  </View>
+                );
+              })}
+            </View>
+          ))}
         </View>
-        <View>
+        <View className="play">
           <Button onClick={() => change("u")}>上</Button>
+          <view className="flex-box">
+            <Button onClick={() => change("l")}>左</Button>
+            <Button onClick={() => change("r")}>右</Button>
+          </view>
           <Button onClick={() => change("d")}>下</Button>
-          <Button onClick={() => change("l")}>左</Button>
-          <Button onClick={() => change("r")}>右</Button>
         </View>
-        <Button onClick={() => start()}>开始</Button>
-        <Button>重新开始</Button>
       </View>
     </>
   );
