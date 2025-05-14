@@ -1,6 +1,6 @@
 import { View, Button, Text } from "@tarojs/components";
 import Taro from "@tarojs/taro";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./index.less";
 
 export default function Index() {
@@ -19,6 +19,7 @@ export default function Index() {
   );
   //蛇的状态
   const [snake, setSnake] = useState<any>({
+    //x表示横轴 y表示纵轴
     position: [
       { x: 3, y: 1 },
       { x: 2, y: 1 },
@@ -27,6 +28,7 @@ export default function Index() {
     direction: "r", //初始方向
     source: 0, //初始分数
   });
+  const [flag, setFlag] = useState<boolean>(false);
 
   //获得零食
   const getEat = () => {
@@ -74,17 +76,22 @@ export default function Index() {
           head.y += 1;
           break;
       }
-      newPosition.push(head);
-      //移动蛇身  如果没有吃到食物 最后一个就舍掉了
-      for (let i = 0; i < prevSnake.position.length - 1; i++) {
-        newPosition.push(prevSnake.position[i]);
-      }
+
       // 碰撞边边
       if (head.x < 0 || head.x >= col || head.y < 0 || head.y >= row) {
+        for (let i = 0; i < prevSnake.position.length; i++) {
+          newPosition.push(prevSnake.position[i]);
+        }
         clearInterval(timer);
         Taro.showModal({
           content: `游戏结束\n本次得分：${prevSnake.source}`,
         });
+      } else {
+        newPosition.push(head);
+        //移动蛇身  如果没有吃到食物 最后一个就舍掉了
+        for (let i = 0; i < prevSnake.position.length - 1; i++) {
+          newPosition.push(prevSnake.position[i]);
+        }
       }
       // 检查是否得分 y行 x列 不能用完全等于
       if (head.x == randomCol && head.y == randomRow) {
@@ -131,9 +138,8 @@ export default function Index() {
       moveSnake();
     }, 300);
   };
-
   //开始/重新开始
-  const start = () => {
+  useEffect(() => {
     // 初始化蛇
     setSnake({
       position: [
@@ -141,7 +147,6 @@ export default function Index() {
         { x: 2, y: 1 },
         { x: 1, y: 1 },
       ], //起始位置
-
       direction: "r", //初始方向
       source: 0, //初始分数
     });
@@ -169,14 +174,23 @@ export default function Index() {
         count--;
       }
     }, 1000);
-  };
+    return () => {
+      clearInterval(countDown);
+      clearInterval(timer);
+    };
+  }, [flag]);
 
   return (
     <>
       <View className="index">
         <View className="action">
           分数：{snake.source}
-          <Text onClick={start} className="start">
+          <Text
+            onClick={() => {
+              setFlag(!flag);
+            }}
+            className="start"
+          >
             开始
           </Text>
         </View>
@@ -186,12 +200,12 @@ export default function Index() {
               <View
                 key={index}
                 style={{
-                  width: "30rpx",
-                  height: "30rpx",
+                  width: "15px",
+                  height: "15px",
                   backgroundColor: index == 0 ? "red" : "green",
                   position: "absolute",
-                  left: item.x * 30 + "rpx",
-                  top: item.y * 30 + "rpx",
+                  left: item.x * 15 + "px",
+                  top: item.y * 15 + "px",
                   borderRadius: "50%",
                 }}
               ></View>
