@@ -1,6 +1,6 @@
 import { View, Button, Text } from "@tarojs/components";
 import Taro from "@tarojs/taro";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import "./index.less";
 
 export default function Index() {
@@ -8,7 +8,7 @@ export default function Index() {
   const row = 20;
   const col = 20;
   // 定时器
-  let timer;
+  let timer = useRef<any>(null);
   let randomRow: number;
   let randomCol: number;
   // 网格 20*20
@@ -55,7 +55,7 @@ export default function Index() {
   };
 
   //移动蛇
-  const moveSnake = () => {
+  const moveSnake = (timer) => {
     // 根据最新的方向移动蛇
     setSnake((prevSnake) => {
       // 状态更新后执行
@@ -105,6 +105,7 @@ export default function Index() {
       // 检测蛇头是否与蛇身重叠
       for (let i = 1; i < newPosition.length; i++) {
         if (newPosition[0].x === newPosition[i].x && newPosition[0].y === newPosition[i].y) {
+          console.log(timer);
           clearInterval(timer);
           Taro.showModal({
             content: `游戏结束\n本次得分：${prevSnake.source}`,
@@ -134,8 +135,8 @@ export default function Index() {
 
   // 游戏开始 蛇移动
   const startGame = () => {
-    timer = setInterval(() => {
-      moveSnake();
+    timer.current = setInterval(() => {
+      moveSnake(timer.current);
     }, 300);
   };
   //开始/重新开始
@@ -157,7 +158,7 @@ export default function Index() {
         .map(() => Array(col).fill(0))
     );
     if (timer) {
-      clearInterval(timer);
+      clearInterval(timer.current);
     }
     //倒计时
     let count = 3;
@@ -176,10 +177,27 @@ export default function Index() {
     }, 1000);
     return () => {
       clearInterval(countDown);
-      clearInterval(timer);
+      clearInterval(timer.current);
     };
   }, [flag]);
 
+  //暂停游戏
+  const stopGame = () => {
+    clearInterval(timer.current);
+    Taro.showModal({
+      content: "暂停游戏",
+      confirmText: "继续游戏",
+      cancelText: "重新开始",
+      success: (res) => {
+        if (res.confirm) {
+          getEat();
+          startGame();
+        } else {
+          setFlag(!flag);
+        }
+      },
+    });
+  };
   return (
     <>
       <View className="index">
@@ -193,6 +211,7 @@ export default function Index() {
           >
             开始
           </Text>
+          <Text onClick={stopGame}>暂停</Text>
         </View>
         <View className="play-box">
           {snake.position.map((item, index) => {
@@ -211,7 +230,7 @@ export default function Index() {
               ></View>
             );
           })}
-          {/* 渲染20*20个网关作为蛇吃饲料的显示以及蛇上下左右移动 */}
+          {/* 渲染20*20个网格作为蛇吃饲料的显示以及蛇上下左右移动 */}
           {grid.map((rowItems, rowIndex) => (
             <View key={rowIndex} className="flex" style={{ display: "flex" }}>
               {rowItems.map((item, colIndex) => {
