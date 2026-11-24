@@ -1,0 +1,62 @@
+{
+  "editor.fontLigatures": false,
+  "stylelint.validate": ["css", "postcss", "less", "sass"],
+  //在全局搜索时排除指定文件
+  "search.exclude": {
+    "/node_modules": true,
+    "dist": true,
+    "pnpm-lock.sh": true
+  },
+  "editor.formatOnSave": true,
+  //统一使用 Prettier 格式化代码
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[less]": {
+    "editor.defaultFormatter": "vscode.css-language-features"
+  },
+  "[scss]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  //配置 ESLint 检查的文件类型
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+
+  // 使用 stylelint 自身的校验即可
+  // 关闭内置 CSS/Less/SCSS 校验，使用 StyleLint 替代
+  "css.validate": false,
+  "less.validate": false,
+  "scss.validate": false,
+  // 保存自动修复eslint和stylelint
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.stylelint": "explicit"
+  },
+  // 启用ESlint作为格式化工具
+  "eslint.format.enable": true,
+  "eslint.run": "onType",
+  "eslint.options": {
+    "plugins": ["html"],
+    "extensions": [".js", ".vue", ".jsx", ".tsx"]
+  }
+}

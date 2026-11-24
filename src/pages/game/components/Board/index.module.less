@@ -1,0 +1,145 @@
+.board {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* 网格线：用两条线性渐变按 5% 平铺，避免渲染 400 个格子节点 */
+.grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: linear-gradient(
+      to right,
+      rgba(92, 242, 176, 0.085) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgba(92, 242, 176, 0.085) 1px, transparent 1px);
+  background-size: 5% 5%;
+}
+
+/* 缓慢下移的扫描光带 */
+.scanline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -120px;
+  height: 120px;
+  background: linear-gradient(
+    180deg,
+    rgba(92, 242, 176, 0) 0%,
+    rgba(92, 242, 176, 0.06) 50%,
+    rgba(92, 242, 176, 0) 100%
+  );
+  animation: scan 7s linear infinite;
+}
+
+.vignette {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  box-shadow: inset 0 0 90px rgba(0, 0, 0, 0.65);
+}
+
+/* 食物：光晕 + 果实 + 叶子 */
+.food {
+  position: absolute;
+  width: 5%;
+  height: 5%;
+  z-index: 5;
+}
+
+.halo {
+  position: absolute;
+  top: -45%;
+  left: -45%;
+  right: -45%;
+  bottom: -45%;
+  border-radius: 50%;
+  background-color: rgba(255, 140, 70, 0.18);
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 158, 84, 0.5) 0%,
+    rgba(255, 120, 60, 0) 70%
+  );
+  animation: haloPulse 1.6s ease-in-out infinite;
+}
+
+.orb {
+  position: absolute;
+  top: 12%;
+  left: 12%;
+  right: 12%;
+  bottom: 12%;
+  border-radius: 50%;
+  background-color: #ff8a3d;
+  background-image: radial-gradient(
+    circle at 32% 28%,
+    #ffeea8 0%,
+    #ffb648 38%,
+    #ff5f45 82%
+  );
+  box-shadow: 0 0 16px rgba(255, 140, 70, 0.85),
+    inset -2px -3px 6px rgba(160, 30, 10, 0.35);
+  animation: foodFloat 1.6s ease-in-out infinite;
+}
+
+.shine {
+  position: absolute;
+  top: 16%;
+  left: 22%;
+  width: 26%;
+  height: 22%;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.leaf {
+  position: absolute;
+  top: 4%;
+  right: 16%;
+  width: 24%;
+  height: 14%;
+  border-radius: 100% 0 100% 0;
+  background-color: #65e59a;
+  background-image: linear-gradient(135deg, #8dffb0, #2fbf71);
+  transform: rotate(-28deg);
+  box-shadow: 0 0 8px rgba(80, 255, 150, 0.6);
+}
+
+@keyframes haloPulse {
+  0%,
+  100% {
+    transform: scale(0.85);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+
+@keyframes foodFloat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.14);
+  }
+}
+
+@keyframes scan {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(800px);
+  }
+}
