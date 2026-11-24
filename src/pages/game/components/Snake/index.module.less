@@ -1,0 +1,94 @@
+.layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+}
+
+.cell {
+  position: absolute;
+  width: 5%;
+  height: 5%;
+}
+
+/* 每个格子内缩一点，形成节与节之间的间隙 */
+.segment {
+  position: absolute;
+  top: 9%;
+  left: 9%;
+  right: 9%;
+  bottom: 9%;
+  border-radius: 30%;
+  box-shadow: inset 0 0 0 1px rgba(6, 40, 30, 0.18);
+}
+
+.head {
+  background-color: #6ff0bd;
+  background-image: radial-gradient(
+    circle at 35% 30%,
+    #dcfff1 0%,
+    #7cf7c4 42%,
+    #2bd39b 100%
+  );
+  box-shadow: 0 0 14px rgba(92, 242, 176, 0.9),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+  z-index: 2;
+}
+
+.headDead {
+  background-color: #ff7b7b;
+  background-image: radial-gradient(
+    circle at 35% 30%,
+    #ffe1e1 0%,
+    #ff7b7b 45%,
+    #d93a3a 100%
+  );
+  box-shadow: 0 0 16px rgba(255, 90, 90, 0.85),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.eye {
+  position: absolute;
+  width: 24%;
+  height: 20%;
+  border-radius: 50%;
+  background: #06251b;
+}
+
+.dirRight .eyeA {
+  top: 24%;
+  right: 16%;
+}
+.dirRight .eyeB {
+  bottom: 24%;
+  right: 16%;
+}
+
+.dirLeft .eyeA {
+  top: 24%;
+  left: 16%;
+}
+.dirLeft .eyeB {
+  bottom: 24%;
+  left: 16%;
+}
+
+.dirUp .eyeA {
+  top: 16%;
+  left: 24%;
+}
+.dirUp .eyeB {
+  top: 16%;
+  right: 24%;
+}
+
+.dirDown .eyeA {
+  bottom: 16%;
+  left: 24%;
+}
+.dirDown .eyeB {
+  bottom: 16%;
+  right: 24%;
+}
